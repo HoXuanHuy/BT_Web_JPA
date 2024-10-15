@@ -209,6 +209,7 @@ public class VideoController extends HttpServlet {
 			String active = req.getParameter("active");
 			int actives=Integer.parseInt(active);
 			String posters = req.getParameter("images");
+			String videos = req.getParameter("videos");
 			
 			Video vid=new Video();
 			vid.setTitle(title);
@@ -220,12 +221,14 @@ public class VideoController extends HttpServlet {
 			vid.setCategory(cate);
 			
 			
-			//luu hinh cuz
+			//luu hinh va video cu
 			Video videoold= vidService.findVideoById(videoid);
 			String fileold =videoold.getPoster();
+			String vidclipold=videoold.getVideoclip();
 			//xu ly image
 			
 			String fname="";
+			String vname="";
 			String uploadPath= UPLOAD_DIRECTORY;
 			File uploadDir= new File(uploadPath);
 			if (uploadDir.exists()) {
@@ -234,8 +237,6 @@ public class VideoController extends HttpServlet {
 			try {
 				Part part =req.getPart("image");
 				if (part.getSize()>0) {
-					
-
 					String filename=Paths.get(part.getSubmittedFileName()).getFileName().toString();
 					//đổi tên file
 					int index=filename.lastIndexOf(".");
@@ -254,6 +255,34 @@ public class VideoController extends HttpServlet {
 					 }
 				else {
 					vid.setPoster(fileold);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			//////////////////
+			
+			try {
+				Part part =req.getPart("video");
+				if (part.getSize()>0) {
+					String filename=Paths.get(part.getSubmittedFileName()).getFileName().toString();
+					//đổi tên file
+					int index=filename.lastIndexOf(".");
+					String ext=filename.substring(index+1);
+					vname=System.currentTimeMillis()+"."+ext;
+					//upload file
+					part.write(uploadPath+"/"+fname);
+					//ghi ten file vao data
+					vid.setVideoclip(vname);
+					
+					 if (!vid.getPoster().substring(0, 5).equals("https") ) {
+					 deleteFile(uploadPath+ "\\" + vidclipold);
+					 }
+				}else if (posters != null) {
+					 vid.setVideoclip(videos);
+					 }
+				else {
+					vid.setVideoclip(vidclipold);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
